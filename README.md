@@ -70,7 +70,7 @@ In this section, we describe the method for communicating with the Greenbone Com
 For installation, pipx is used.
 Execute the following command:
 ```shell
-pipx install git+https://github.com/zackey-heuristics/gvm-tools
+pipx install git+https://github.com/zackey-heuristics/gvm-tools --force
 ```
 
 Execute the following command to check the version of the Greenbone Community Containers. However, replace <GMP_USERNAME4SOCKET> and <GMP_PASSWORD4SOCKET> with the username and password you have configured. By default, both are set to `admin`.
@@ -87,4 +87,49 @@ When the correct username and password are provided, the following output is pro
 Execute the following command to stop the Greenbone Community Containers:
 ```shell
 docker compose down --volumes
+```
+
+## Method for Changing the Location of gvmd.sock and the Corresponding Configuration Procedures
+
+The method described in the "How to Run Containers" section requires recreating the directory and running commands with administrative privileges each time the machine is started.
+This section explains how to address these issues.
+
+First, create an appropriate directory under a directory where the current user has, by default, read (r), write (w), and execute (x) permissions. 
+For example, if the current user is "heuristics", create a directory with a path such as:
+```shell
+/home/heuristics/run/gvmd/
+```
+When creating the directory, execute the following command:
+```shell
+mkdir -p $HOME/run/gvmd
+```
+
+Next, modify the relevant section of the docker-compose.yml file as follows:
+```yaml
+volumes:
+  gpg_data_vol:
+  scap_data_vol:
+  cert_data_vol:
+  data_objects_vol:
+  gvmd_data_vol:
+  psql_data_vol:
+  vt_data_vol:
+  notus_data_vol:
+  psql_socket_vol:
+  gvmd_socket_vol:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/heuristics/run/gvmd/
+  ospd_openvas_socket_vol:
+  redis_socket_vol:
+  openvas_data_vol:
+  openvas_log_data_vol:
+```
+Using the above configuration, launch the Greenbone Community Containers.
+
+Finally, execute the following command to check the version of the Greenbone Community Containers:
+```shell
+gvm-cli socket --socketpath $HOME/run/gvmd/gvmd.sock --xml "<get_version/>"
 ```
