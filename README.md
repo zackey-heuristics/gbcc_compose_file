@@ -133,3 +133,20 @@ Finally, execute the following command to check the version of the Greenbone Com
 ```shell
 gvm-cli socket --socketpath $HOME/run/gvmd/gvmd.sock --xml "<get_version/>"
 ```
+
+## Note: Disabling the Port Exposure of the Greenbone Security Assistant (GSA) Web Interface
+
+This repository is configured to interact with the Greenbone Community Containers using Unix Domain Sockets. As a result, the port for the Greenbone Security Assistant (GSA) Web Interface is not exposed by default.
+
+To enable the GSA Web Interface, remove the comment markers from the relevant section as indicated below:
+```yaml
+  gsa:
+    image: registry.community.greenbone.net/community/gsa:stable
+    restart: on-failure
+    # ports:
+    #   - 127.0.0.1:9392:80
+    volumes:
+      - gvmd_socket_vol:/run/gvmd
+    depends_on:
+      - gvmd
+```
